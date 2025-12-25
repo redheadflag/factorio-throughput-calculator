@@ -1,25 +1,31 @@
 package io.github.redheadflag.world;
 
 public enum Direction {
-    UP('U', "Turned Up"),
-    DOWN('D', "Turned Down"),
-    LEFT('L', "Turned Left"),
-    RIGHT('R', "Turned Right");
+    UP('U', 0, -1),
+    DOWN('D', 0, 1),
+    LEFT('L', -1, 0),
+    RIGHT('R', 1, 0);
 
     private final char code;        // short code for parsing
-    private final String description; // human-readable description
+    private final int dx;
+    private final int dy;
 
-    Direction(char code, String description) {
+    Direction(char code, int dx, int dy) {
         this.code = code;
-        this.description = description;
+        this.dx = dx;
+        this.dy = dy;
     }
 
     public char getCode() {
         return code;
     }
 
-    public String getDescription() {
-        return description;
+    public int getDx() {
+        return dx;
+    }
+
+    public int getDy() {
+        return dy;
     }
 
     public static Direction fromCode(char code) {
@@ -33,6 +39,6 @@ public enum Direction {
 
     @Override
     public String toString() {
-        return description;
+        return Character.toString(code);
     }
 }

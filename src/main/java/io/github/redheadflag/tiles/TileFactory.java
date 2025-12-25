@@ -1,4 +1,7 @@
-package io.github.redheadflag.world;
+package io.github.redheadflag.tiles;
+
+import io.github.redheadflag.world.Direction;
+import io.github.redheadflag.world.ResourceType;
 
 public class TileFactory {
     public static Tile parseTile(String s) {

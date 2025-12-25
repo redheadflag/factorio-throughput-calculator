@@ -5,12 +5,37 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
+import io.github.redheadflag.tiles.Tile;
+import io.github.redheadflag.tiles.TileFactory;
+
 public class GameGrid {
     private Tile[][] grid;
     private static final boolean strictGridSizeCheck = true;
 
     public GameGrid(int x, int y, Tile[][] grid) {
         this.grid = grid;
+    }
+
+    public Tile getTile(int x, int y) {
+        if (grid == null) {
+            return null;
+        }
+        if (x < 0 || y < 0 || x >= grid.length || y >= grid[x].length) {
+            return null;
+        }
+        return grid[x][y];
+    }
+
+    public void tick(long tickCount) {
+        if (grid == null) return;
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[i].length; j++) {
+                Tile t = grid[i][j];
+                if (t instanceof Updatable u) {
+                    u.tick(tickCount);
+                }
+            }
+        }
     }
 
     public static GameGrid fromFile(String fp) {
@@ -29,7 +54,10 @@ public class GameGrid {
                 throw new RuntimeException("Expected " + dim.x() + " rows but found " + gridList.size());    
             }
 
-            Tile[][] grid = new Tile[dim.x()][dim.y()];
+            int x_size = dim.x(), y_size = dim.y();
+
+            Tile[][] grid = new Tile[x_size][y_size];
+            GameGrid gameGrid = new GameGrid(x_size, y_size, grid);
             
             for (int i = 0; i < grid.length; i++) {
                 String[] tiles = gridList.get(i).split(" ");
@@ -40,11 +68,13 @@ public class GameGrid {
 
                 for (int j = 0; j < tiles.length; j++) {
                     String tileString = tiles[j].strip();
-                    grid[i][j] = TileFactory.parseTile(tileString);
+                    Tile tile = TileFactory.parseTile(tileString);
+                    grid[i][j] = tile;
+                    tile.attachToGrid(gameGrid, i, j);
                 }
             }
 
-            return new GameGrid(dim.x(), dim.y(), grid);
+            return gameGrid;
         }
         catch (IOException e) {
             throw new RuntimeException("Failed to read file: " + fp, e);
@@ -63,7 +93,7 @@ public class GameGrid {
     }
 
     public void display() {
-        System.out.print(this.toString());
+        System.out.println(this);
     }
 
     @Override

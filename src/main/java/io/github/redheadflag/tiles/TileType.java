@@ -1,4 +1,4 @@
-package io.github.redheadflag.world;
+package io.github.redheadflag.tiles;
 
 public enum TileType {
     SOURCE('S', "Source"),
