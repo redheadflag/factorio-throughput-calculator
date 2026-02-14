@@ -28,6 +28,11 @@ private final List<ResourceSlot> slots = new ArrayList<>();
         return Collections.unmodifiableList(slots);
     }
 
+    public boolean add(ResourceType resourceType) {
+        Resource res = new Resource(resourceType);
+        return add(res);
+    }
+
     public boolean add(Resource res) {
         // Try empty slots first
         for (ResourceSlot slot : slots) {
@@ -48,6 +53,15 @@ private final List<ResourceSlot> slots = new ArrayList<>();
     public Optional<Resource> removeFirst(ResourceType type) {
         for (ResourceSlot slot : slots) {
             if (!slot.isEmpty() && slot.get().type == type) {
+                return Optional.of(slot.remove());
+            }
+        }
+        return Optional.empty();
+    }
+
+    public Optional<Resource> removeFirst() {
+        for (ResourceSlot slot : slots) {
+            if (!slot.isEmpty()) {
                 return Optional.of(slot.remove());
             }
         }

@@ -2,7 +2,9 @@ package io.github.redheadflag.world;
 
 public enum ResourceType {
     IRON('I', "Iron"),
-    COPPER('C', "Copper");
+    COPPER('C', "Copper"),
+    COPPER_WIRE('W', "Copper Wire"),
+    INDUCTOR('I', "Inductor");
 
     private final char code;
     private final String description;

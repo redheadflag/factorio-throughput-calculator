@@ -7,7 +7,7 @@ public enum TileType {
     ASSEMBLING_STATION_1('1', "Assembling Station 1"),
     ASSEMBLING_STATION_2('2', "Assembling Station 2"),
     CHEST('C', "Chest"),
-    EMPTY('.', "Empty");  // using a space or "" as code for empty
+    EMPTY('.', "Empty");
 
     private final char code;
     private final String description;
@@ -25,13 +25,11 @@ public enum TileType {
         return description;
     }
 
-    // Optional: override toString() for easy printing
     @Override
     public String toString() {
         return description;
     }
 
-    // Parse from code to TileType
     public static TileType fromCode(char code) {
         for (TileType t : TileType.values()) {
             if (t.code == code) {

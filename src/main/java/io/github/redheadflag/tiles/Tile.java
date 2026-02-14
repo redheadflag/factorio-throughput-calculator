@@ -8,12 +8,12 @@ import io.github.redheadflag.world.GameGrid;
 import io.github.redheadflag.world.Inventory;
 
 public abstract class Tile {
-    protected TileType type;
+    private TileType type;
     protected final Inventory inventory;
 
-    protected int x = -1;
-    protected int y = -1;
-    protected GameGrid gameGrid;
+    private int x = -1;
+    private int y = -1;
+    private GameGrid gameGrid;
 
     public Tile(TileType type, int slotCount) {
         this.type = type;
@@ -47,7 +47,7 @@ public abstract class Tile {
         if (gameGrid == null) throw new IllegalStateException("Tile not attached to a GameGrid");
         int nx = x + direction.getDx();
         int ny = y + direction.getDy();
-        return gameGrid.getTile(nx, ny);
+        return gameGrid.getTileAt(nx, ny);
     }
 
     public List<Tile> getNeighbours() {

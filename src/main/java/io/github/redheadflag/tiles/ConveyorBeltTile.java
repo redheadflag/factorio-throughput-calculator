@@ -1,6 +1,9 @@
 package io.github.redheadflag.tiles;
 
+import java.util.Optional;
+
 import io.github.redheadflag.world.Direction;
+import io.github.redheadflag.world.Resource;
 import io.github.redheadflag.world.Updatable;
 
 public class ConveyorBeltTile extends Tile implements Updatable {
@@ -18,7 +21,27 @@ public class ConveyorBeltTile extends Tile implements Updatable {
 
     @Override
     public void tick(long tickCount) {
-        // TODO: implement movement logic: move resources from this tile to adjacent tile
+        if (!canProvide())
+            return;
+
+        Tile target = getNeighbourTile(direction);
+        if (target == null)
+            return;
+
+        if (!target.canAccept())
+            return;
+
+        Optional<Resource> maybeItem = inventory.removeFirst();
+        if (maybeItem.isEmpty())
+            return;
+
+        Resource item = maybeItem.get();
+
+        boolean accepted = target.getInventory().add(item);
+
+        if (!accepted) {
+            inventory.add(item);
+        }
     }
 
     @Override

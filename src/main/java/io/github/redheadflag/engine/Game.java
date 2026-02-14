@@ -7,17 +7,19 @@ import java.util.concurrent.TimeUnit;
 
 public class Game {
     private final GameGrid grid;
+    private final Runnable requestRender;
     private long tickCount = 0;
     private ScheduledExecutorService scheduler;
 
-    public Game(GameGrid grid) {
+    public Game(GameGrid grid, Runnable requestRender) {
         this.grid = grid;
+        this.requestRender = requestRender;
     }
 
     public void tick() {
         tickCount++;
         grid.tick(tickCount);
-        grid.display();
+        requestRender.run();
     }
 
     /**

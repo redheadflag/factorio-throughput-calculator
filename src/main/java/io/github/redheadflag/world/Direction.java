@@ -37,6 +37,21 @@ public enum Direction {
         throw new IllegalArgumentException("Unknown code: " + code);
     }
 
+    public Direction getOppositeDirection() {
+        switch (this) {
+            case UP:
+                return DOWN;
+            case DOWN:
+                return UP;
+            case LEFT:
+                return RIGHT;
+            case RIGHT:
+                return LEFT;
+            default:
+                throw new IllegalStateException("Unexpected value: " + this);
+        }
+    }
+
     @Override
     public String toString() {
         return Character.toString(code);
