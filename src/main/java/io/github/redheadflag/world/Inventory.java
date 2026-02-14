@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class Inventory {
-private final List<ResourceSlot> slots = new ArrayList<>();
+    private final List<ResourceSlot> slots = new ArrayList<>();
     private final boolean infinite;
 
     public Inventory(int slotCount) {
@@ -17,6 +17,12 @@ private final List<ResourceSlot> slots = new ArrayList<>();
             for (int i = 0; i < slotCount; i++) {
                 slots.add(new ResourceSlot());
             }
+        }
+    }
+
+    public void fill(ResourceType resourceType) {
+        while(!isFull()) {
+            add(resourceType);
         }
     }
 

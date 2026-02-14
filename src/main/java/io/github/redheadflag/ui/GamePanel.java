@@ -11,7 +11,7 @@ import io.github.redheadflag.world.ResourceType;
 
 public class GamePanel extends JPanel {
     private final GameGrid grid;
-    private final int tileSize = 64; // pixels per tile
+    private final int tileSize = 100; // pixels per tile
 
     public GamePanel(GameGrid grid) {
         this.grid = grid;
@@ -59,26 +59,33 @@ public class GamePanel extends JPanel {
 
                     // Build a short debug string — first entry only for now
                     String text = counts.entrySet().stream()
-                            .map(e -> e.getKey().name() + ": " + e.getValue())
-                            .findFirst()
-                            .orElse("");
+                        .sorted(Map.Entry.comparingByKey())
+                        .map(e -> e.getKey().name() + ": " + e.getValue())
+                        .collect(Collectors.joining("\n"));
 
                     // Draw text bottom-right
-                    g2.setFont(new Font("Monospaced", Font.BOLD, 11));
+                    g2.setFont(new Font("Monospaced", Font.BOLD, 16));
                     FontMetrics fm = g2.getFontMetrics();
 
-                    int textWidth = fm.stringWidth(text);
-                    // int textHeight = fm.getAscent();
+                    String[] lines = text.split("\n");
+                    int lineHeight = fm.getHeight();
 
-                    int tx = px + tileSize - textWidth - 2;
                     int ty = py + tileSize - 2;
 
-                    // add shadow for readability
-                    g2.setColor(Color.BLACK);
-                    g2.drawString(text, tx + 1, ty + 1);
+                    for (int i = 0; i < lines.length; i++) {
+                        String line = lines[lines.length - 1 - i]; // bottom-up
+                        int textWidth = fm.stringWidth(line);
+                        int tx = px + tileSize - textWidth - 2;
 
-                    g2.setColor(Color.YELLOW);
-                    g2.drawString(text, tx, ty);
+                        int yLine = ty - (i * lineHeight);
+
+                        // shadow
+                        g2.setColor(Color.BLACK);
+                        g2.drawString(line, tx + 1, yLine + 1);
+
+                        g2.setColor(Color.YELLOW);
+                        g2.drawString(line, tx, yLine);
+                    }
                 }
             }
         }

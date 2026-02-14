@@ -2,7 +2,6 @@ package io.github.redheadflag.tiles;
 
 import java.util.List;
 
-import io.github.redheadflag.world.Resource;
 import io.github.redheadflag.world.ResourceType;
 import io.github.redheadflag.world.Updatable;
 
@@ -12,21 +11,23 @@ public class SourceTileBase extends Tile implements Updatable {
     public SourceTileBase(ResourceType resourceType, int capacity) {
         super(TileType.SOURCE, capacity);
         this.resourceType = resourceType;
+        this.inventory.fill(resourceType);
     }
 
     @Override
     public void tick(long tickCount) {
-        inventory.add(new Resource(resourceType));
+        if (!canProvide()) return;
+
+        boolean isProvided = false;
 
         List<Tile> neighbours = getNeighbours();
         for (Tile neighbour : neighbours) {
-            if (!canProvide()) {
-                return;
-            }
+            if (isProvided) return;
 
             if (neighbour.canAccept()) {
                 inventory.removeFirst(resourceType)
                     .ifPresent(neighbour.inventory::add);
+                isProvided = true;
             }
         }
     }

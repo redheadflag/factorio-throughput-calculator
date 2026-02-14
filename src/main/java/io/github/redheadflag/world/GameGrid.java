@@ -54,8 +54,6 @@ public class GameGrid {
        ======================== */
 
     public void tick(long tickCount) {
-        if (grid == null) return;
-
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 Tile t = grid[y][x];
