@@ -69,8 +69,8 @@ public class AssemblingStation2Tile extends Tile implements Updatable {
     }
 
     private void consumeIronAndWire() {
-        inventory.removeFirst(ResourceType.IRON);
-        inventory.removeFirst(ResourceType.COPPER_WIRE);
+        inventory.removeFirstOfType(ResourceType.IRON);
+        inventory.removeFirstOfType(ResourceType.COPPER_WIRE);
     }
 
     private boolean produceInductorToNeighbor(long tickCount) {

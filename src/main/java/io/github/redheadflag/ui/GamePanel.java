@@ -49,13 +49,7 @@ public class GamePanel extends JPanel {
                 if (!tile.getInventory().isEmpty()) {
 
                     // Count resources by type
-                    Map<ResourceType, Long> counts =
-                            tile.getInventory().getSlots().stream()
-                                    .filter(s -> !s.isEmpty())
-                                    .collect(Collectors.groupingBy(
-                                            s -> s.get().type,
-                                            Collectors.counting()
-                                    ));
+                    Map<ResourceType, Long> counts = tile.getInventory().countByType();
 
                     // Build a short debug string — first entry only for now
                     String text = counts.entrySet().stream()

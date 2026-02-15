@@ -29,29 +29,28 @@ public class Policies {
     }
 
     private static class BasicPolicy implements StoragePolicy {
-        private final int maxSlots;
+        private final int maxItems;
         private final Set<ResourceType> allowed;
 
-        private BasicPolicy(int maxSlots, Set<ResourceType> allowed) {
-            this.maxSlots = maxSlots;
+        private BasicPolicy(int maxItems, Set<ResourceType> allowed) {
+            this.maxItems = maxItems;
             this.allowed = allowed;
         }
 
         @Override
-        public int maxSlots() {
-            return maxSlots;
+        public int maxItems() {
+            return maxItems;
         }
 
         @Override
         public boolean canInsert(Inventory inv, Resource res) {
-            if (maxSlots == 0) return false;
+            if (maxItems == 0) return false;
             if (allowed != null && !allowed.contains(res.type)) return false;
-            return inv.itemCount() < maxSlots; // inventory tracks how many items stored
+            return inv.itemCount() < maxItems;
         }
 
         @Override
         public boolean canExtract(Inventory inv, ResourceType type) {
-            // You can add more rules later (locks, filters, etc.)
             return inv.has(type);
         }
     }

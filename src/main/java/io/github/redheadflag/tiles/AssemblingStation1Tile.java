@@ -1,5 +1,6 @@
 package io.github.redheadflag.tiles;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -39,7 +40,9 @@ public class AssemblingStation1Tile extends Tile implements Updatable {
             return;
         }
 
-        if (count(ResourceType.COPPER) >= 2) {
+        if (inventory.hasAll(Map.of(
+            ResourceType.COPPER, 2
+        ))) {
             Tile out = getNeighbourTile(OUTPUT);
             if (out != null && out.getInventory() != null) {
                 processingTicksLeft = PROCESS_TIME_TICKS;
@@ -59,17 +62,9 @@ public class AssemblingStation1Tile extends Tile implements Updatable {
         transfer.transferOne(inventory, out.getInventory(), tickCount);
     }
 
-    private int count(ResourceType type) {
-        int c = 0;
-        for (var slot : inventory.getSlots()) {
-            if (!slot.isEmpty() && slot.get().type == type) c++;
-        }
-        return c;
-    }
-
     private void consumeTwoCopper() {
-        inventory.removeFirst(ResourceType.COPPER);
-        inventory.removeFirst(ResourceType.COPPER);
+        inventory.removeFirstOfType(ResourceType.COPPER);
+        inventory.removeFirstOfType(ResourceType.COPPER);
     }
 
     private boolean produceWireToNeighbor(long tickCount) {

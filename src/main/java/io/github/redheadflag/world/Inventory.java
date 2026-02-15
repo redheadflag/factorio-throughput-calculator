@@ -6,40 +6,29 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import io.github.redheadflag.tiles.StoragePolicy;
 import io.github.redheadflag.tiles.Tile;
 
 public class Inventory {
-    private final List<ResourceSlot> slots = new ArrayList<>();
+    private final List<Resource> items = new ArrayList<>();
     private final StoragePolicy policy;
 
     public Inventory(StoragePolicy policy) {
         this.policy = policy;
-
-        int cap = policy.maxSlots();
-        if (cap != Integer.MAX_VALUE) {
-            for (int i = 0; i < cap; i++) slots.add(new ResourceSlot());
-        }
     }
 
     public StoragePolicy getPolicy() {
         return policy;
     }
 
-    /** Number of non-empty slots (i.e., number of items with your current 1-per-slot model). */
     public int itemCount() {
-        int c = 0;
-        for (ResourceSlot s : slots) if (!s.isEmpty()) c++;
-        return c;
-    }
-
-    public int slotCount() {
-        return slots.size();
+        return items.size();
     }
 
     public int capacity() {
-        return policy.maxSlots();
+        return policy.maxItems();
     }
 
     public void fill(ResourceType resourceType) {
@@ -58,61 +47,50 @@ public class Inventory {
 
     public boolean add(Resource res) {
         if (!policy.canInsert(this, res)) return false;
-
-        // Try empty slots first
-        for (ResourceSlot slot : slots) {
-            if (slot.isEmpty()) return slot.put(res);
-        }
-
-        // If infinite capacity, grow list
-        if (policy.maxSlots() == Integer.MAX_VALUE) {
-            slots.add(new ResourceSlot(res));
-            return true;
-        }
-
-        return false;
+        return items.add(res);
     }
 
     public Optional<Resource> peekFirst() {
-        for (ResourceSlot slot : slots) {
-            if (!slot.isEmpty()) return Optional.of(slot.get());
-        }
-        return Optional.empty();
+        if (itemCount() == 0)
+            return Optional.empty();
+
+        return Optional.of(items.getFirst());
     }
 
     public Optional<Resource> removeFirst() {
-        for (ResourceSlot slot : slots) {
-            if (!slot.isEmpty()) return Optional.of(slot.remove());
-        }
-        return Optional.empty();
+        if (itemCount() == 0)
+            return Optional.empty();
+
+        return Optional.of(items.remove(0));
     }
 
-    public Optional<Resource> removeFirst(ResourceType type) {
-        for (ResourceSlot slot : slots) {
-            if (!slot.isEmpty() && slot.get().type == type) return Optional.of(slot.remove());
+    public Optional<Resource> removeFirstOfType(ResourceType type) {
+        for (int i = 0; i < itemCount(); i++) {
+            Resource res = items.get(i);
+            if (res.type == type) {
+                return Optional.of(items.remove(i));
+            }
         }
-
         return Optional.empty();
     }
 
     public boolean has(ResourceType type) {
-        for (ResourceSlot s : slots) {
-            if (!s.isEmpty() && s.get().type == type) return true;
+        for (Resource res : items) {
+            if (res.type == type) return true;
         }
         return false;
     }
 
     public boolean isFull() {
-        if (policy.maxSlots() == Integer.MAX_VALUE) return false;
-        return itemCount() >= policy.maxSlots();
+        return itemCount() >= policy.maxItems();
     }
 
     public boolean isEmpty() {
         return itemCount() == 0;
     }
 
-    public List<ResourceSlot> getSlots() {
-        return Collections.unmodifiableList(slots);
+    public List<Resource> getItems() {
+        return Collections.unmodifiableList(items);
     }
 
     public boolean transferFirstTo(Inventory targetInv, long tick) {
@@ -150,11 +128,8 @@ public class Inventory {
         Map<ResourceType, Long> counts = new EnumMap<>(ResourceType.class);
 
         // count resources in inventory
-        for (ResourceSlot slot : slots) {
-            if (!slot.isEmpty()) {
-                ResourceType type = slot.get().type;
-                counts.put(type, counts.getOrDefault(type, 0L) + 1);
-            }
+        for (Resource res : items) {
+            counts.put(res.type, counts.getOrDefault(res.type, 0L) + 1);
         }
 
         // check required amounts
@@ -164,5 +139,17 @@ public class Inventory {
         }
 
         return true;
+    }
+
+    public Map<ResourceType, Long> countByType() {
+        return this
+            .getItems()
+            .stream()
+            .collect(
+                Collectors.groupingBy(
+                    s -> s.type,
+                    Collectors.counting()
+                )
+            );
     }
 }

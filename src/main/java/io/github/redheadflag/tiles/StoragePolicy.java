@@ -7,5 +7,5 @@ import io.github.redheadflag.world.ResourceType;
 public interface StoragePolicy {
     boolean canInsert(Inventory inv, Resource res);
     boolean canExtract(Inventory inv, ResourceType type);
-    int maxSlots();
+    int maxItems();
 }
