@@ -1,22 +1,14 @@
 package io.github.redheadflag.tiles;
 
+import io.github.redheadflag.world.Policies;
+
 public class EmptyTile extends Tile {
     public EmptyTile() {
-        super(TileType.EMPTY, 0);
+        super(TileType.EMPTY, Policies.empty());
     }
 
     @Override
     public String toString() {
         return getType().getDescription();
-    }
-
-    @Override
-    public boolean canAccept() {
-        return false;
-    }
-
-    @Override
-    public boolean canProvide() {
-        return false;
     }
 }

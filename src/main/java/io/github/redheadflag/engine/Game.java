@@ -28,7 +28,7 @@ public class Game {
     }
 
     /**
-     * Start a fixed-rate tick loop (ticksPerSecond). Call stopTicks() to stop.
+     * Start a fixed-rate tick loop (ticksPerSecond). Call stop() to stop.
      */
     public void start(int ticksPerSecond) {
         if (scheduler != null && !scheduler.isShutdown()) return;

@@ -1,22 +1,14 @@
 package io.github.redheadflag.tiles;
 
+import io.github.redheadflag.world.Policies;
+
 public class ChestTile extends Tile {
     public ChestTile() {
-        super(TileType.CHEST, true);
+        super(TileType.CHEST, Policies.chestInfinite());
     }
 
     @Override
     public String toString() {
         return getType().getDescription();
-    }
-
-    @Override
-    public boolean canAccept() {
-        return true;
-    }
-
-    @Override
-    public boolean canProvide() {
-        return false;
     }
 }

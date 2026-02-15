@@ -15,14 +15,9 @@ public abstract class Tile {
     private int y = -1;
     private GameGrid gameGrid;
 
-    public Tile(TileType type, int slotCount) {
+    public Tile(TileType type, StoragePolicy policy) {
         this.type = type;
-        this.inventory = new Inventory(slotCount);
-    }
-
-    protected Tile(TileType type, boolean infiniteSlots) {
-        this.type = type;
-        this.inventory = new Inventory(infiniteSlots ? -1 : 0);
+        this.inventory = new Inventory(policy);
     }
 
     public TileType getType() {
@@ -64,7 +59,4 @@ public abstract class Tile {
     public String toString() {
         return type.getDescription();
     }
-
-    public abstract boolean canAccept();
-    public abstract boolean canProvide();
 }

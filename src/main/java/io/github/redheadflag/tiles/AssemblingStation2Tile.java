@@ -1,8 +1,10 @@
 package io.github.redheadflag.tiles;
 
 import java.util.Optional;
+import java.util.Set;
 
 import io.github.redheadflag.world.Direction;
+import io.github.redheadflag.world.Policies;
 import io.github.redheadflag.world.Resource;
 import io.github.redheadflag.world.ResourceType;
 import io.github.redheadflag.world.Updatable;
@@ -12,66 +14,56 @@ public class AssemblingStation2Tile extends Tile implements Updatable {
     private static final Direction OUTPUT = Direction.RIGHT;
 
     public AssemblingStation2Tile() {
-        super(TileType.ASSEMBLING_STATION_2, 2);
+        super(TileType.ASSEMBLING_STATION_2, Policies.only(Set.of(ResourceType.COPPER_WIRE, ResourceType.IRON), Integer.MAX_VALUE));
     }
 
     @Override
     public void tick(long tickCount) {
 
-        // 1) Try to push completed items out
-        tryPushOutput();
+        // // 1) Try to push completed items out
+        // tryPushOutput();
 
-        // 2) If already processing → count down
-        if (processingTicksLeft > 0) {
-            processingTicksLeft--;
-            if (processingTicksLeft == 0) {
-                // Finish recipe
-                inventory.removeFirst(ResourceType.IRON);
-                inventory.removeFirst(ResourceType.COPPER_WIRE);
+        // // 2) If already processing → count down
+        // if (processingTicksLeft > 0) {
+        //     processingTicksLeft--;
+        //     if (processingTicksLeft == 0) {
+        //         // Finish recipe
+        //         inventory.removeFirst(ResourceType.IRON);
+        //         inventory.removeFirst(ResourceType.COPPER_WIRE);
 
-                inventory.add(ResourceType.INDUCTOR);
-            }
-            return;
-        }
+        //         inventory.add(ResourceType.INDUCTOR);
+        //     }
+        //     return;
+        // }
 
-        // 3) If idle → check recipe
-        boolean hasIron = inventory.has(ResourceType.IRON);
-        boolean hasWire = inventory.has(ResourceType.COPPER_WIRE);
+        // // 3) If idle → check recipe
+        // boolean hasIron = inventory.has(ResourceType.IRON);
+        // boolean hasWire = inventory.has(ResourceType.COPPER_WIRE);
 
-        if (hasIron && hasWire) {
-            processingTicksLeft = 3; // processing duration
-        }
+        // if (hasIron && hasWire) {
+        //     processingTicksLeft = 3; // processing duration
+        // }
     }
 
     private void tryPushOutput() {
-        if (inventory.isEmpty())
-            return;
+        // if (inventory.isEmpty())
+        //     return;
 
-        Tile out = getNeighbourTile(OUTPUT);
-        if (out == null)
-            return;
+        // Tile out = getNeighbourTile(OUTPUT);
+        // if (out == null)
+        //     return;
 
-        if (!out.canAccept())
-            return;
+        // if (!out.canAccept())
+        //     return;
 
-        Optional<Resource> item = inventory.removeFirst();
-        if (item.isEmpty())
-            return;
+        // Optional<Resource> item = inventory.removeFirst();
+        // if (item.isEmpty())
+        //     return;
 
-        boolean ok = out.getInventory().add(item.get());
-        if (!ok) {
-            inventory.add(item.get());
-        }
-    }
-
-    @Override
-    public boolean canAccept() {
-        return !inventory.isFull();
-    }
-
-    @Override
-    public boolean canProvide() {
-        return !inventory.isEmpty();
+        // boolean ok = out.getInventory().add(item.get());
+        // if (!ok) {
+        //     inventory.add(item.get());
+        // }
     }
 
     @Override

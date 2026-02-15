@@ -7,17 +7,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import io.github.redheadflag.tiles.StoragePolicy;
+import io.github.redheadflag.tiles.Tile;
+
 public class Inventory {
     private final List<ResourceSlot> slots = new ArrayList<>();
-    private final boolean infinite;
+    private final StoragePolicy policy;
 
-    public Inventory(int slotCount) {
-        this.infinite = (slotCount < 0);
-        if (!infinite) {
-            for (int i = 0; i < slotCount; i++) {
-                slots.add(new ResourceSlot());
-            }
+    public Inventory(StoragePolicy policy) {
+        this.policy = policy;
+
+        int cap = policy.maxSlots();
+        if (cap != Integer.MAX_VALUE) {
+            for (int i = 0; i < cap; i++) slots.add(new ResourceSlot());
         }
+    }
+
+    public StoragePolicy getPolicy() {
+        return policy;
+    }
+
+    /** Number of non-empty slots (i.e., number of items with your current 1-per-slot model). */
+    public int itemCount() {
+        int c = 0;
+        for (ResourceSlot s : slots) if (!s.isEmpty()) c++;
+        return c;
+    }
+
+    public int slotCount() {
+        return slots.size();
+    }
+
+    public int capacity() {
+        return policy.maxSlots();
     }
 
     public void fill(ResourceType resourceType) {
@@ -26,68 +48,90 @@ public class Inventory {
         }
     }
 
-    public int size() {
-        return infinite ? slots.size() : slots.size();
-    }
-
-    public List<ResourceSlot> getSlots() {
-        return Collections.unmodifiableList(slots);
+    public boolean canAdd(Resource res) {
+        return policy.canInsert(this, res);
     }
 
     public boolean add(ResourceType resourceType) {
-        Resource res = new Resource(resourceType);
-        return add(res);
+        return add(new Resource(resourceType));
     }
 
     public boolean add(Resource res) {
+        if (!policy.canInsert(this, res)) return false;
+
         // Try empty slots first
         for (ResourceSlot slot : slots) {
             if (slot.isEmpty()) return slot.put(res);
         }
 
-        // If chest → infinite slots
-        if (infinite) {
-            ResourceSlot slot = new ResourceSlot();
-            slot.put(res);
-            slots.add(slot);
+        // If infinite capacity, grow list
+        if (policy.maxSlots() == Integer.MAX_VALUE) {
+            slots.add(new ResourceSlot(res));
             return true;
         }
 
-        return false; // no room
+        return false;
     }
 
-    public Optional<Resource> removeFirst(ResourceType type) {
+    public Optional<Resource> peekFirst() {
         for (ResourceSlot slot : slots) {
-            if (!slot.isEmpty() && slot.get().type == type) {
-                return Optional.of(slot.remove());
-            }
+            if (!slot.isEmpty()) return Optional.of(slot.get());
         }
         return Optional.empty();
     }
 
     public Optional<Resource> removeFirst() {
         for (ResourceSlot slot : slots) {
-            if (!slot.isEmpty()) {
-                return Optional.of(slot.remove());
-            }
+            if (!slot.isEmpty()) return Optional.of(slot.remove());
         }
         return Optional.empty();
     }
 
     public boolean has(ResourceType type) {
-        return slots.stream()
-                .anyMatch(s -> !s.isEmpty() && s.get().type == type);
+        for (ResourceSlot s : slots) {
+            if (!s.isEmpty() && s.get().type == type) return true;
+        }
+        return false;
     }
 
-    /** Returns true if all slots are full (infinite slots are never full) */
     public boolean isFull() {
-        if (infinite) return false;
-        return slots.stream().allMatch(slot -> !slot.isEmpty());
+        if (policy.maxSlots() == Integer.MAX_VALUE) return false;
+        return itemCount() >= policy.maxSlots();
     }
 
-    /** Returns true if all slots are empty */
     public boolean isEmpty() {
-        return slots.stream().allMatch(ResourceSlot::isEmpty);
+        return itemCount() == 0;
+    }
+
+    public List<ResourceSlot> getSlots() {
+        return Collections.unmodifiableList(slots);
+    }
+
+    public boolean transferFirstTo(Inventory targetInv, long tick) {
+        Optional<Resource> removed = this.removeFirst();
+        if (removed.isEmpty()) return false;
+        
+        Resource res = removed.get();
+        if (res.movedThisTick(tick)) {
+            this.add(res);
+            return false;
+        }
+
+        boolean added = targetInv.add(res);
+        if (!added) {
+            this.add(res);
+            return false;
+        }
+
+        res.markMoved(tick);
+
+        return true;
+    }
+
+    public boolean transferFirstTo(Tile targetTile, long tick) {
+        Inventory targetInv = targetTile.getInventory();
+        if (targetInv == null) return false;
+        return transferFirstTo(targetInv, tick);
     }
 
     /**

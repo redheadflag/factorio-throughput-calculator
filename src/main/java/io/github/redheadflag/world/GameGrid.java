@@ -54,8 +54,8 @@ public class GameGrid {
        ======================== */
 
     public void tick(long tickCount) {
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
+        for (int y = height-1; y >= 0; y--) {
+            for (int x = width-1; x >= 0; x--) {
                 Tile t = grid[y][x];
                 if (t instanceof Updatable u) {
                     u.tick(tickCount);
