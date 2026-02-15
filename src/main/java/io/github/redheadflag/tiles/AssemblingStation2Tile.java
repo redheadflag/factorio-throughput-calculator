@@ -1,6 +1,5 @@
 package io.github.redheadflag.tiles;
 
-import java.util.Optional;
 import java.util.Set;
 
 import io.github.redheadflag.world.Direction;
@@ -10,60 +9,85 @@ import io.github.redheadflag.world.ResourceType;
 import io.github.redheadflag.world.Updatable;
 
 public class AssemblingStation2Tile extends Tile implements Updatable {
-    private int processingTicksLeft = 0;
     private static final Direction OUTPUT = Direction.RIGHT;
+    private static final int PROCESS_TIME_TICKS = 3;
+
+    private int processingTicksLeft = 0;
 
     public AssemblingStation2Tile() {
-        super(TileType.ASSEMBLING_STATION_2, Policies.only(Set.of(ResourceType.COPPER_WIRE, ResourceType.IRON), Integer.MAX_VALUE));
+        super(TileType.ASSEMBLING_STATION_2, Policies.only(Set.of(ResourceType.COPPER_WIRE, ResourceType.IRON), 2));
     }
 
     @Override
     public void tick(long tickCount) {
+        tryPushOutput(tickCount);
 
-        // // 1) Try to push completed items out
-        // tryPushOutput();
+        if (processingTicksLeft > 0) {
+            processingTicksLeft--;
+            if (processingTicksLeft == 0) {
+                consumeIronAndWire();
+                if (!produceInductorToNeighbor(tickCount)) {
+                    inventory.add(ResourceType.IRON);
+                    inventory.add(ResourceType.COPPER_WIRE);
+                }
+            }
+            return;
+        }
 
-        // // 2) If already processing → count down
-        // if (processingTicksLeft > 0) {
-        //     processingTicksLeft--;
-        //     if (processingTicksLeft == 0) {
-        //         // Finish recipe
-        //         inventory.removeFirst(ResourceType.IRON);
-        //         inventory.removeFirst(ResourceType.COPPER_WIRE);
-
-        //         inventory.add(ResourceType.INDUCTOR);
-        //     }
-        //     return;
-        // }
-
-        // // 3) If idle → check recipe
-        // boolean hasIron = inventory.has(ResourceType.IRON);
-        // boolean hasWire = inventory.has(ResourceType.COPPER_WIRE);
-
-        // if (hasIron && hasWire) {
-        //     processingTicksLeft = 3; // processing duration
-        // }
+        if (inventory.has(ResourceType.IRON) && inventory.has(ResourceType.COPPER_WIRE)) {
+            Tile out = getNeighbourTile(OUTPUT);
+            if (out != null && out.getInventory() != null) {
+                processingTicksLeft = PROCESS_TIME_TICKS;
+            }
+        }
     }
 
-    private void tryPushOutput() {
-        // if (inventory.isEmpty())
-        //     return;
+    private void tryPushOutput(long tickCount) {
+        var peek = inventory.peekFirst();
+        if (peek.isEmpty()) return;
+        if (peek.get().type != ResourceType.INDUCTOR) return;
 
-        // Tile out = getNeighbourTile(OUTPUT);
-        // if (out == null)
-        //     return;
+        Tile out = getNeighbourTile(OUTPUT);
+        if (out == null) return;
 
-        // if (!out.canAccept())
-        //     return;
+        var outInv = out.getInventory();
+        if (outInv == null) return;
 
-        // Optional<Resource> item = inventory.removeFirst();
-        // if (item.isEmpty())
-        //     return;
+        if (peek.get().movedThisTick(tickCount)) return;
+        if (!outInv.canAdd(peek.get())) return;
 
-        // boolean ok = out.getInventory().add(item.get());
-        // if (!ok) {
-        //     inventory.add(item.get());
-        // }
+        var removed = inventory.removeFirst();
+        if (removed.isEmpty()) return;
+
+        boolean ok = outInv.add(removed.get());
+        if (!ok) {
+            inventory.add(removed.get());
+            return;
+        }
+
+        removed.get().markMoved(tickCount);
+    }
+
+    private void consumeIronAndWire() {
+        inventory.removeFirst(ResourceType.IRON);
+        inventory.removeFirst(ResourceType.COPPER_WIRE);
+    }
+
+    private boolean produceInductorToNeighbor(long tickCount) {
+        Tile out = getNeighbourTile(OUTPUT);
+        if (out == null) return false;
+
+        var outInv = out.getInventory();
+        if (outInv == null) return false;
+
+        Resource inductor = new Resource(ResourceType.INDUCTOR);
+        if (!outInv.canAdd(inductor)) return false;
+
+        boolean ok = outInv.add(inductor);
+        if (!ok) return false;
+
+        inductor.markMoved(tickCount);
+        return true;
     }
 
     @Override

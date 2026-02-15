@@ -6,7 +6,7 @@ import io.github.redheadflag.world.GameGrid;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
-        GameGrid grid = GameGrid.fromFile("grid.txt");
+        GameGrid grid = GameGrid.fromFile("grid_templates/grid-1.txt");
         GamePanel panel = new GamePanel(grid);
 
         Game game = new Game(

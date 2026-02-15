@@ -7,67 +7,84 @@ import io.github.redheadflag.world.Direction;
 import io.github.redheadflag.world.Policies;
 import io.github.redheadflag.world.Resource;
 import io.github.redheadflag.world.ResourceType;
+import io.github.redheadflag.world.TransferService;
 import io.github.redheadflag.world.Updatable;
 
 public class AssemblingStation1Tile extends Tile implements Updatable {
-    private int processingTicksLeft = 0;
     private static final Direction OUTPUT = Direction.RIGHT;
+    private static final int PROCESS_TIME_TICKS = 2;
+
+    private final TransferService transfer = new TransferService();
+
+    private int processingTicksLeft = 0;
 
     public AssemblingStation1Tile() {
-        super(TileType.ASSEMBLING_STATION_1, Policies.only(Set.of(ResourceType.COPPER), Integer.MAX_VALUE));
+        super(TileType.ASSEMBLING_STATION_1, Policies.only(Set.of(ResourceType.COPPER), 2));
     }
 
     @Override
     public void tick(long tickCount) {
+        tryPushOutput(tickCount);
 
-        // // 1) Try to push any finished product out first
-        // tryPushOutput();
+        if (processingTicksLeft > 0) {
+            --processingTicksLeft;
+            if (processingTicksLeft == 0) {
+                consumeTwoCopper();
 
-        // // 2) If currently processing, count down
-        // if (processingTicksLeft > 0) {
-        //     processingTicksLeft--;
-        //     if (processingTicksLeft == 0) {
-        //         // Recipe completes now
-        //         inventory.removeFirst(ResourceType.COPPER);
-        //         inventory.removeFirst(ResourceType.COPPER);
+                if (!produceWireToNeighbor(tickCount)) {
+                    inventory.add(ResourceType.COPPER);
+                    inventory.add(ResourceType.COPPER);
+                }
+            }
+            return;
+        }
 
-        //         inventory.add(ResourceType.COPPER_WIRE);
-        //     }
-        //     return;
-        // }
-
-        // // 3) Not processing → check if we can start a recipe
-        // boolean hasTwoCopper =
-        //         inventory.has(ResourceType.COPPER) &&
-        //         inventory.getSlots().stream()
-        //                 .filter(s -> !s.isEmpty() && s.get().type == ResourceType.COPPER)
-        //                 .count() >= 2;
-
-        // if (hasTwoCopper) {
-        //     processingTicksLeft = 2;   // processing duration
-        // }
+        if (count(ResourceType.COPPER) >= 2) {
+            Tile out = getNeighbourTile(OUTPUT);
+            if (out != null && out.getInventory() != null) {
+                processingTicksLeft = PROCESS_TIME_TICKS;
+            }
+        }
     }
 
-    private void tryPushOutput() {
-        // if (inventory.isEmpty())
-        //     return;
+    private void tryPushOutput(long tickCount) {
+        Optional<Resource> peek = inventory.peekFirst();
+        if (peek.isEmpty()) return;
 
-        // Tile out = getNeighbourTile(OUTPUT);
-        // if (out == null)
-        //     return;
+        if (peek.get().type != ResourceType.COPPER_WIRE) return;
 
-        // if (!out.canAccept())
-        //     return;
+        Tile out = getNeighbourTile(OUTPUT);
+        if (out == null) return;
 
-        // Optional<Resource> item = inventory.removeFirst();
-        // if (item.isEmpty())
-        //     return;
+        transfer.transferOne(inventory, out.getInventory(), tickCount);
+    }
 
-        // boolean ok = out.getInventory().add(item.get());
-        // if (!ok) {
-        //     // restore if somehow failed
-        //     inventory.add(item.get());
-        // }
+    private int count(ResourceType type) {
+        int c = 0;
+        for (var slot : inventory.getSlots()) {
+            if (!slot.isEmpty() && slot.get().type == type) c++;
+        }
+        return c;
+    }
+
+    private void consumeTwoCopper() {
+        inventory.removeFirst(ResourceType.COPPER);
+        inventory.removeFirst(ResourceType.COPPER);
+    }
+
+    private boolean produceWireToNeighbor(long tickCount) {
+        Tile out = getNeighbourTile(OUTPUT);
+        if (out == null) return false;
+
+        Resource wire = new Resource(ResourceType.COPPER_WIRE);
+
+        if (!out.getInventory().canAdd(wire)) return false;
+
+        boolean ok = out.getInventory().add(wire);
+        if (!ok) return false;
+
+        wire.markMoved(tickCount);
+        return true;
     }
 
     @Override

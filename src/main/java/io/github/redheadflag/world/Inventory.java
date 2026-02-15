@@ -87,6 +87,14 @@ public class Inventory {
         return Optional.empty();
     }
 
+    public Optional<Resource> removeFirst(ResourceType type) {
+        for (ResourceSlot slot : slots) {
+            if (!slot.isEmpty() && slot.get().type == type) return Optional.of(slot.remove());
+        }
+
+        return Optional.empty();
+    }
+
     public boolean has(ResourceType type) {
         for (ResourceSlot s : slots) {
             if (!s.isEmpty() && s.get().type == type) return true;
