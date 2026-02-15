@@ -41,7 +41,7 @@ public class GamePanel extends JPanel {
 
                 if (tile == null) continue;
 
-                var img = TileSprites.get(tile.getType());
+                var img = TileSprites.get(tile);
                 if (img != null) {
                     g.drawImage(img, px, py, tileSize, tileSize, null);
                 }

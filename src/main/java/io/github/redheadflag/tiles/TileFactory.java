@@ -12,12 +12,7 @@ public class TileFactory {
             case SOURCE -> {
                 ResourceType resourceType = ResourceType.fromCode(s.charAt(1));
                 int quantity = Integer.parseInt(s.substring(2));
-                if (resourceType == ResourceType.IRON)
-                    yield new IronSourceTile(quantity);
-                else if (resourceType == ResourceType.COPPER)
-                    yield new CopperSourceTile(quantity);
-                else
-                    throw new IllegalArgumentException("Unknown resource code '" + s.charAt(1) + "' in tile string: \"" + s + "\"");
+                yield new SourceTile(resourceType, quantity);
             }
             case CONVEYOR_BELT -> {
                 Direction direction = Direction.fromCode(s.charAt(1));

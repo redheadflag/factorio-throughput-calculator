@@ -7,14 +7,18 @@ import io.github.redheadflag.world.ResourceType;
 import io.github.redheadflag.world.TransferService;
 import io.github.redheadflag.world.Updatable;
 
-public class SourceTileBase extends Tile implements Updatable {
-    ResourceType resourceType;
+public class SourceTile extends Tile implements Updatable {
+    private final ResourceType resourceType;
     private final TransferService transfer = new TransferService();
 
-    public SourceTileBase(ResourceType resourceType, int capacity) {
+    public SourceTile(ResourceType resourceType, int capacity) {
         super(TileType.SOURCE, Policies.buffer(capacity));
         this.resourceType = resourceType;
         this.inventory.fill(resourceType);
+    }
+
+    public ResourceType getResourceType() {
+        return resourceType;
     }
 
     @Override

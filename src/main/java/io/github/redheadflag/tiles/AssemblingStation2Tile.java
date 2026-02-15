@@ -9,7 +9,7 @@ import io.github.redheadflag.world.ResourceType;
 import io.github.redheadflag.world.Updatable;
 
 public class AssemblingStation2Tile extends Tile implements Updatable {
-    private static final Direction OUTPUT = Direction.RIGHT;
+    private static final Direction OUTPUT = Direction.DOWN;
     private static final int PROCESS_TIME_TICKS = 3;
 
     private int processingTicksLeft = 0;
