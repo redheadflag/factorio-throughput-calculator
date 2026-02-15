@@ -11,7 +11,7 @@ import io.github.redheadflag.world.TransferService;
 import io.github.redheadflag.world.Updatable;
 
 public class AssemblingStation1Tile extends Tile implements Updatable {
-    private static final Direction OUTPUT = Direction.DOWN;
+    private static final Direction OUTPUT = Direction.RIGHT;
     private static final int PROCESS_TIME_TICKS = 2;
 
     private final TransferService transfer = new TransferService();

@@ -92,7 +92,7 @@ public class GameGrid {
             GameGrid gameGrid = new GameGrid(width, height, grid);
 
             for (int y = 0; y < height; y++) {
-                String[] tiles = rows.get(y).split(" ");
+                String[] tiles = rows.get(y).trim().split("\\s+");
 
                 if (tiles.length < width || (strictGridSizeCheck && tiles.length != width)) {
                     throw new RuntimeException(
