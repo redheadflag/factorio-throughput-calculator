@@ -1,11 +1,14 @@
 package io.github.redheadflag.engine;
 
+import io.github.redheadflag.ui.StatisticsWindow;
 import io.github.redheadflag.world.GameGrid;
 import io.github.redheadflag.world.TickContext;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import javax.swing.SwingUtilities;
 
 public class Game {
     private final GameGrid grid;
@@ -30,7 +33,10 @@ public class Game {
         grid.tick(tickContext);
         requestRender.run();
         if (tickContext.checkEndCondition()) {
-            System.exit(0);
+            stop();
+            SwingUtilities.invokeLater(() -> 
+                StatisticsWindow.show(tickContext, grid)
+            );
         }
     }
 

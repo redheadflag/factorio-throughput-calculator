@@ -1,2 +1,2 @@
 1 5
-SC10 BR BR BR C
+SC9 BR BR BR C

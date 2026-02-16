@@ -1,0 +1,4 @@
+3 5
+SC10 BD .  .  .
+.    BD .  .  .
+SI10 BR BR BR C

@@ -12,7 +12,6 @@ public class GameGrid {
 
     // grid[y][x]
     private final Tile[][] grid;
-    private final TickContext tickContext;
     private final int width;
     private final int height;
 
@@ -22,7 +21,6 @@ public class GameGrid {
         this.width = width;
         this.height = height;
         this.grid = grid;
-        this.tickContext = new TickContext();
     }
 
     /* ========================

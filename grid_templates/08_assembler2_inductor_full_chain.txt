@@ -1,0 +1,6 @@
+5 9
+SC9 BR BR 1 BR BR BD .  .
+.   .  .  . .  .  BD .  .
+SI9 BR BR BR BR BR 2  BR C
+.   .  .  . .  .  .  .  .
+.   .  .  . .  .  .  .  .

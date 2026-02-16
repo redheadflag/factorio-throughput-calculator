@@ -60,6 +60,6 @@ public class TemplateSelectionWindow {
                 () -> GameWindow.show(panel)
         );
 
-        game.start(2);
+        game.start(5);
     }
 }
