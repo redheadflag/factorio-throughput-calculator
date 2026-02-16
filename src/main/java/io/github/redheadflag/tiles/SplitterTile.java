@@ -2,6 +2,7 @@ package io.github.redheadflag.tiles;
 
 import io.github.redheadflag.world.Direction;
 import io.github.redheadflag.world.Policies;
+import io.github.redheadflag.world.TickContext;
 import io.github.redheadflag.world.TransferService;
 import io.github.redheadflag.world.Updatable;
 
@@ -17,12 +18,14 @@ public class SplitterTile extends Tile implements Updatable {
     }
 
     @Override
-    public void tick(long tickCount) {
+    public void tick(TickContext tickContext) {
         if (inventory.isEmpty()) return;
         
         Tile out = getSideTile(nextOutputIndex % 2 == 0);
-        transfer.transferOne(this.inventory, out.getInventory(), tickCount);
-        
+        boolean isUpdated = transfer.transferOne(this.inventory, out.getInventory(), tickContext.tickCount());
+        if (isUpdated) {
+            tickContext.logUpdate();  // TODO: Move to transferOne method
+        }
         this.nextOutputIndex = (nextOutputIndex + 1) % 2;
     }
 

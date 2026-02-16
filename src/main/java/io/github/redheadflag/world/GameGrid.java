@@ -12,6 +12,7 @@ public class GameGrid {
 
     // grid[y][x]
     private final Tile[][] grid;
+    private final TickContext tickContext;
     private final int width;
     private final int height;
 
@@ -21,6 +22,7 @@ public class GameGrid {
         this.width = width;
         this.height = height;
         this.grid = grid;
+        this.tickContext = new TickContext();
     }
 
     /* ========================
@@ -53,12 +55,12 @@ public class GameGrid {
        Tick
        ======================== */
 
-    public void tick(long tickCount) {
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
+    public void tick(TickContext tickContext) {
+        for (int y = height-1; y >= 0; y--) {
+            for (int x = width-1; x >= 0; x--) {
                 Tile t = grid[y][x];
                 if (t instanceof Updatable u) {
-                    u.tick(tickCount);
+                    u.tick(tickContext);
                 }
             }
         }

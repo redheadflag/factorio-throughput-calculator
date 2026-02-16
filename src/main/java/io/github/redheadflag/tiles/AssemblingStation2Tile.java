@@ -6,6 +6,7 @@ import io.github.redheadflag.world.Direction;
 import io.github.redheadflag.world.Policies;
 import io.github.redheadflag.world.Resource;
 import io.github.redheadflag.world.ResourceType;
+import io.github.redheadflag.world.TickContext;
 import io.github.redheadflag.world.Updatable;
 
 public class AssemblingStation2Tile extends Tile implements Updatable {
@@ -19,16 +20,19 @@ public class AssemblingStation2Tile extends Tile implements Updatable {
     }
 
     @Override
-    public void tick(long tickCount) {
-        tryPushOutput(tickCount);
+    public void tick(TickContext tickContext) {
+        tryPushOutput(tickContext.tickCount());
 
         if (processingTicksLeft > 0) {
             processingTicksLeft--;
             if (processingTicksLeft == 0) {
                 consumeIronAndWire();
-                if (!produceInductorToNeighbor(tickCount)) {
+                if (!produceInductorToNeighbor(tickContext.tickCount())) {
                     inventory.add(ResourceType.IRON);
                     inventory.add(ResourceType.COPPER_WIRE);
+                }
+                else {
+                    tickContext.logUpdate();
                 }
             }
             return;

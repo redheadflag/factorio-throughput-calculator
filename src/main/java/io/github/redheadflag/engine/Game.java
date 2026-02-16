@@ -1,6 +1,8 @@
 package io.github.redheadflag.engine;
 
 import io.github.redheadflag.world.GameGrid;
+import io.github.redheadflag.world.TickContext;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -9,27 +11,29 @@ public class Game {
     private final GameGrid grid;
     private final Runnable requestRender;
     private final Runnable onStart;
-    private long tickCount = 0;
+    private final TickContext tickContext;
     private ScheduledExecutorService scheduler;
 
-    public Game(GameGrid grid,
+    public Game(
+        GameGrid grid,
         Runnable requestRender,
         Runnable onStart
     ) {
         this.grid = grid;
         this.requestRender = requestRender;
         this.onStart = onStart;
+        this.tickContext = new TickContext();
     }
 
     public void tick() {
-        tickCount++;
-        grid.tick(tickCount);
+        tickContext.incrTickCount();
+        grid.tick(tickContext);
         requestRender.run();
+        if (tickContext.checkEndCondition()) {
+            System.exit(0);
+        }
     }
 
-    /**
-     * Start a fixed-rate tick loop (ticksPerSecond). Call stop() to stop.
-     */
     public void start(int ticksPerSecond) {
         if (scheduler != null && !scheduler.isShutdown()) return;
         

@@ -1,5 +1,5 @@
 package io.github.redheadflag.world;
 
 public interface Updatable {
-    void tick(long tickCount);
+    void tick(TickContext ctx);
 }

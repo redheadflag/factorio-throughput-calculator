@@ -8,6 +8,7 @@ import io.github.redheadflag.world.Direction;
 import io.github.redheadflag.world.Policies;
 import io.github.redheadflag.world.Resource;
 import io.github.redheadflag.world.ResourceType;
+import io.github.redheadflag.world.TickContext;
 import io.github.redheadflag.world.TransferService;
 import io.github.redheadflag.world.Updatable;
 
@@ -24,17 +25,20 @@ public class AssemblingStation1Tile extends Tile implements Updatable {
     }
 
     @Override
-    public void tick(long tickCount) {
-        tryPushOutput(tickCount);
+    public void tick(TickContext tickContext) {
+        tryPushOutput(tickContext.tickCount());
 
         if (processingTicksLeft > 0) {
             --processingTicksLeft;
             if (processingTicksLeft == 0) {
                 consumeTwoCopper();
 
-                if (!produceWireToNeighbor(tickCount)) {
+                if (!produceWireToNeighbor(tickContext.tickCount())) {
                     inventory.add(ResourceType.COPPER);
                     inventory.add(ResourceType.COPPER);
+                }
+                else {
+                    tickContext.logUpdate();
                 }
             }
             return;

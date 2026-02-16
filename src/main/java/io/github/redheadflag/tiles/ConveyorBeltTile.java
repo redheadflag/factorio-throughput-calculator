@@ -2,6 +2,7 @@ package io.github.redheadflag.tiles;
 
 import io.github.redheadflag.world.Direction;
 import io.github.redheadflag.world.Policies;
+import io.github.redheadflag.world.TickContext;
 import io.github.redheadflag.world.TransferService;
 import io.github.redheadflag.world.Updatable;
 
@@ -20,10 +21,13 @@ public class ConveyorBeltTile extends Tile implements Updatable {
     }
 
     @Override
-    public void tick(long tickCount) {
+    public void tick(TickContext tickContext) {
         Tile target = getNeighbourTile(direction);
         if (target == null) return;
 
-        transfer.transferOne(this.inventory, target.getInventory(), tickCount);
+        boolean isTransfered = transfer.transferOne(this.inventory, target.getInventory(), tickContext.tickCount());
+        if (isTransfered) {
+            tickContext.logUpdate();  // TODO: Move to transferOne method
+        }
     }
 }
