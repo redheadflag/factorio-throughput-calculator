@@ -54,7 +54,7 @@ public class Inventory {
         if (itemCount() == 0)
             return Optional.empty();
 
-        return Optional.of(items.getFirst());
+        return items.stream().findFirst();
     }
 
     public Optional<Resource> removeFirst() {
