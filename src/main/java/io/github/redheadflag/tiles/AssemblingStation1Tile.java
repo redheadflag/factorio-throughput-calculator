@@ -26,7 +26,7 @@ public class AssemblingStation1Tile extends Tile implements Updatable {
 
     @Override
     public void tick(TickContext tickContext) {
-        tryPushOutput(tickContext.tickCount());
+        tryPushOutput(tickContext);
 
         if (processingTicksLeft > 0) {
             --processingTicksLeft;
@@ -54,7 +54,7 @@ public class AssemblingStation1Tile extends Tile implements Updatable {
         }
     }
 
-    private void tryPushOutput(long tickCount) {
+    private void tryPushOutput(TickContext tickContext) {
         Optional<Resource> peek = inventory.peekFirst();
         if (peek.isEmpty()) return;
 
@@ -63,7 +63,7 @@ public class AssemblingStation1Tile extends Tile implements Updatable {
         Tile out = getNeighbourTile(OUTPUT);
         if (out == null) return;
 
-        transfer.transferOne(inventory, out.getInventory(), tickCount);
+        transfer.transferOne(this, out, tickContext);
     }
 
     private void consumeTwoCopper() {

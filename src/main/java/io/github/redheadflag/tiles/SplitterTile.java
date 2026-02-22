@@ -22,11 +22,16 @@ public class SplitterTile extends Tile implements Updatable {
         if (inventory.isEmpty()) return;
         
         Tile out = getSideTile(nextOutputIndex % 2 == 0);
-        boolean isUpdated = transfer.transferOne(this.inventory, out.getInventory(), tickContext.tickCount());
-        if (isUpdated) {
-            tickContext.logUpdate();  // TODO: Move to transferOne method
-        }
+        transfer.transferOne(this, out, tickContext);
         this.nextOutputIndex = (nextOutputIndex + 1) % 2;
+    }
+
+    public Tile[] getOutputTilesByPriority() {
+        boolean preferLeft = (nextOutputIndex % 2 == 0);
+        if (preferLeft) {
+            return new Tile[] { getSideTile(true), getSideTile(false) };
+        }
+        return new Tile[] { getSideTile(false), getSideTile(true) };
     }
 
     private Tile getSideTile(boolean left) {

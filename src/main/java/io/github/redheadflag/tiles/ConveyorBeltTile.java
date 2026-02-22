@@ -15,6 +15,10 @@ public class ConveyorBeltTile extends Tile implements Updatable {
         this.direction = direction;
     }
 
+    public Direction getDirection() {
+        return direction;
+    }
+
     @Override
     public String toString() {
         return getType().getDescription() + " (" + direction + ")" + " (" + getX() + ", " + getY() + ")";
@@ -25,9 +29,6 @@ public class ConveyorBeltTile extends Tile implements Updatable {
         Tile target = getNeighbourTile(direction);
         if (target == null) return;
 
-        boolean isTransfered = transfer.transferOne(this.inventory, target.getInventory(), tickContext.tickCount());
-        if (isTransfered) {
-            tickContext.logUpdate();  // TODO: Move to transferOne method
-        }
+        transfer.transferOne(this, target, tickContext);
     }
 }

@@ -1,5 +1,6 @@
 package io.github.redheadflag.tiles;
 
+import java.util.Optional;
 import java.util.Set;
 
 import io.github.redheadflag.world.Direction;
@@ -7,11 +8,14 @@ import io.github.redheadflag.world.Policies;
 import io.github.redheadflag.world.Resource;
 import io.github.redheadflag.world.ResourceType;
 import io.github.redheadflag.world.TickContext;
+import io.github.redheadflag.world.TransferService;
 import io.github.redheadflag.world.Updatable;
 
 public class AssemblingStation2Tile extends Tile implements Updatable {
     private static final Direction OUTPUT = Direction.RIGHT;
     private static final int PROCESS_TIME_TICKS = 3;
+
+    private final TransferService transfer = new TransferService();
 
     private int processingTicksLeft = 0;
 
@@ -21,7 +25,7 @@ public class AssemblingStation2Tile extends Tile implements Updatable {
 
     @Override
     public void tick(TickContext tickContext) {
-        tryPushOutput(tickContext.tickCount());
+        tryPushOutput(tickContext);
 
         if (processingTicksLeft > 0) {
             processingTicksLeft--;
@@ -46,30 +50,16 @@ public class AssemblingStation2Tile extends Tile implements Updatable {
         }
     }
 
-    private void tryPushOutput(long tickCount) {
-        var peek = inventory.peekFirst();
+    private void tryPushOutput(TickContext tickContext) {
+        Optional<Resource> peek = inventory.peekFirst();
         if (peek.isEmpty()) return;
-        if (peek.get().type != ResourceType.INDUCTOR) return;
+
+        if (peek.get().type != ResourceType.COPPER_WIRE) return;
 
         Tile out = getNeighbourTile(OUTPUT);
         if (out == null) return;
 
-        var outInv = out.getInventory();
-        if (outInv == null) return;
-
-        if (peek.get().movedThisTick(tickCount)) return;
-        if (!outInv.canAdd(peek.get())) return;
-
-        var removed = inventory.removeFirst();
-        if (removed.isEmpty()) return;
-
-        boolean ok = outInv.add(removed.get());
-        if (!ok) {
-            inventory.add(removed.get());
-            return;
-        }
-
-        removed.get().markMoved(tickCount);
+        transfer.transferOne(this, out, tickContext);
     }
 
     private void consumeIronAndWire() {

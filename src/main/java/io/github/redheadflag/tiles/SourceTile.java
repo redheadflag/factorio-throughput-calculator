@@ -26,10 +26,7 @@ public class SourceTile extends Tile implements Updatable {
     public void tick(TickContext tickContext) {
         List<Tile> neighbours = getNeighbours();
         for (Tile neighbour : neighbours) {
-            boolean isUpdated = transfer.transferOne(this.inventory, neighbour.inventory, tickContext.tickCount());
-            if (isUpdated) {
-                tickContext.logUpdate();  // TODO: Move to transferOne method
-            }
+            transfer.transferOne(this, neighbour, tickContext);
         }
     }
 }
