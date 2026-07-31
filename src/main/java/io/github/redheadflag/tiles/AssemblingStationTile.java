@@ -1,5 +1,6 @@
 package io.github.redheadflag.tiles;
 
+import java.util.List;
 import java.util.Optional;
 
 import io.github.redheadflag.world.Direction;
@@ -59,6 +60,12 @@ public abstract class AssemblingStationTile extends Tile implements Updatable {
 
     public Tile getOutputTile() {
         return getNeighbourTile(OUTPUT);
+    }
+
+    @Override
+    public List<Tile> getPushTargets() {
+        Tile out = getOutputTile();
+        return out == null ? List.of() : List.of(out);
     }
 
     private boolean tryPushOutput(TickContext tickContext) {

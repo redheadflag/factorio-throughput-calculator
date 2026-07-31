@@ -55,6 +55,14 @@ public abstract class Tile {
         return neighbours;
     }
 
+    public List<Tile> getPushTargets() {
+        return List.of();
+    }
+
+    public List<Tile> getForwardTargets() {
+        return List.of();
+    }
+
     @Override
     public String toString() {
         return type.getDescription();

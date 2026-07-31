@@ -1,5 +1,7 @@
 package io.github.redheadflag.tiles;
 
+import java.util.List;
+
 import io.github.redheadflag.world.Direction;
 import io.github.redheadflag.world.Policies;
 import io.github.redheadflag.world.TickContext;
@@ -30,5 +32,16 @@ public class ConveyorBeltTile extends Tile implements Updatable {
         if (target == null) return false;
 
         return transfer.transferOne(this, target, tickContext);
+    }
+
+    @Override
+    public List<Tile> getPushTargets() {
+        Tile target = getNeighbourTile(direction);
+        return target == null ? List.of() : List.of(target);
+    }
+
+    @Override
+    public List<Tile> getForwardTargets() {
+        return getPushTargets();
     }
 }

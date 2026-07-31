@@ -1,16 +1,11 @@
 package io.github.redheadflag.world;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.github.redheadflag.tiles.AssemblingStationTile;
-import io.github.redheadflag.tiles.ConveyorBeltTile;
-import io.github.redheadflag.tiles.SourceTile;
-import io.github.redheadflag.tiles.SplitterTile;
 import io.github.redheadflag.tiles.Tile;
 
 public final class TileComponents {
@@ -45,7 +40,7 @@ public final class TileComponents {
                 Tile t = grid.getTileAt(x, y);
                 if (t == null)
                     continue;
-                for (Tile target : pushTargets(t)) {
+                for (Tile target : t.getPushTargets()) {
                     if (target != null)
                         union(parent, t, target);
                 }
@@ -65,22 +60,6 @@ public final class TileComponents {
             }
         }
         return new ArrayList<>(byRoot.values());
-    }
-
-    private static List<Tile> pushTargets(Tile tile) {
-        if (tile instanceof ConveyorBeltTile belt) {
-            return List.of(belt.getNeighbourTile(belt.getDirection()));
-        }
-        if (tile instanceof SplitterTile splitter) {
-            return Arrays.asList(splitter.getOutputTilesByPriority());
-        }
-        if (tile instanceof SourceTile) {
-            return tile.getNeighbours();
-        }
-        if (tile instanceof AssemblingStationTile assembler) {
-            return List.of(assembler.getOutputTile());
-        }
-        return List.of();
     }
 
     private static Tile find(Map<Tile, Tile> parent, Tile t) {

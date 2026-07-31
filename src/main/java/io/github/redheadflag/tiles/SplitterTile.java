@@ -1,5 +1,8 @@
 package io.github.redheadflag.tiles;
 
+import java.util.Arrays;
+import java.util.List;
+
 import io.github.redheadflag.world.Direction;
 import io.github.redheadflag.world.Policies;
 import io.github.redheadflag.world.TickContext;
@@ -25,6 +28,16 @@ public class SplitterTile extends Tile implements Updatable {
         boolean moved = transfer.transferOne(this, out, tickContext);
         this.nextOutputIndex = (nextOutputIndex + 1) % 2;
         return moved;
+    }
+
+    @Override
+    public List<Tile> getPushTargets() {
+        return Arrays.asList(getOutputTilesByPriority());
+    }
+
+    @Override
+    public List<Tile> getForwardTargets() {
+        return getPushTargets();
     }
 
     public Tile[] getOutputTilesByPriority() {

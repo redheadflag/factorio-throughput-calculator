@@ -1,13 +1,9 @@
 package io.github.redheadflag.world;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
-import java.util.List;
 import java.util.Optional;
 
-import io.github.redheadflag.tiles.ConveyorBeltTile;
-import io.github.redheadflag.tiles.SplitterTile;
 import io.github.redheadflag.tiles.Tile;
 
 public class TransferService {
@@ -53,31 +49,12 @@ public class TransferService {
     }
 
     private boolean makeRoomInTarget(Tile targetTile, TickContext tickContext, Deque<Tile> path) {
-        List<Tile> forwardTargets = getForwardTargets(targetTile);
-        for (Tile next : forwardTargets) {
+        for (Tile next : targetTile.getForwardTargets()) {
             if (transferOneRecursive(targetTile, next, tickContext, path)) {
                 return true;
             }
         }
         return false;
-    }
-
-    private List<Tile> getForwardTargets(Tile tile) {
-        List<Tile> targets = new ArrayList<>();
-
-        if (tile instanceof ConveyorBeltTile belt) {
-            targets.add(belt.getNeighbourTile(belt.getDirection()));
-            return targets;
-        }
-
-        if (tile instanceof SplitterTile splitter) {
-            for (Tile target : splitter.getOutputTilesByPriority()) {
-                targets.add(target);
-            }
-            return targets;
-        }
-
-        return targets;
     }
 
     private boolean commitTransfer(Inventory from, Inventory to, Resource res, TickContext tickContext) {

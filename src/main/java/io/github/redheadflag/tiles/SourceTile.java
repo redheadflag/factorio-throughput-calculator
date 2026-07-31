@@ -33,4 +33,9 @@ public class SourceTile extends Tile implements Updatable {
         }
         return moved;
     }
+
+    @Override
+    public List<Tile> getPushTargets() {
+        return getNeighbours();
+    }
 }
