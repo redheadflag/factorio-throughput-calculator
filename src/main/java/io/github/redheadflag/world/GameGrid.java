@@ -3,7 +3,13 @@ package io.github.redheadflag.world;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import io.github.redheadflag.tiles.Tile;
 import io.github.redheadflag.tiles.TileFactory;
@@ -16,6 +22,12 @@ public class GameGrid {
     private final int height;
 
     private static final boolean strictGridSizeCheck = true;
+
+    private List<List<Tile>> components;
+    private List<Callable<Boolean>> tasks;
+    private ExecutorService pool;
+
+    private TickContext currentTickContext;
 
     public GameGrid(int width, int height, Tile[][] grid) {
         this.width = width;
@@ -54,13 +66,56 @@ public class GameGrid {
        ======================== */
 
     public void tick(TickContext tickContext) {
-        for (int y = height-1; y >= 0; y--) {
-            for (int x = width-1; x >= 0; x--) {
-                Tile t = grid[y][x];
-                if (t instanceof Updatable u) {
-                    u.tick(tickContext);
+        currentTickContext = tickContext;
+
+        if (components == null) {
+            components = new TileComponents(this).compute();
+        }
+        if (tasks == null) {
+            tasks = new ArrayList<>();
+            for (List<Tile> component : components) {
+                tasks.add(() -> tickComponent(component, currentTickContext));
+            }
+        }
+        if (pool == null) {
+            int threads = Runtime.getRuntime().availableProcessors() - 1;
+            pool = Executors.newFixedThreadPool(threads);
+        }
+
+        try {
+            List<Future<Boolean>> futures = pool.invokeAll(tasks);
+
+            boolean anyUpdate = false;
+            for (Future<Boolean> future : futures) {
+                if (future.get()) {
+                    anyUpdate = true;
                 }
             }
+            if (anyUpdate) {
+                tickContext.logUpdate();
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Interrupted while ticking grid", e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException("A tile failed to tick", e.getCause());
+        }
+    }
+
+    private boolean tickComponent(List<Tile> component, TickContext tickContext) {
+        boolean anyUpdate = false;
+        for (Tile t : component) {
+            if (((Updatable) t).tick(tickContext)) {
+                anyUpdate = true;
+            }
+        }
+        return anyUpdate;
+    }
+
+    public void shutdown() {
+        if (pool != null) {
+            pool.shutdownNow();
+            pool = null;
         }
     }
 

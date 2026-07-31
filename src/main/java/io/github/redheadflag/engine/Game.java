@@ -30,14 +30,19 @@ public class Game {
     }
 
     public void tick() {
-        tickContext.incrTickCount();
-        grid.tick(tickContext);
-        requestRender.run();
-        if (tickContext.checkEndCondition()) {
+        try {
+            tickContext.incrTickCount();
+            grid.tick(tickContext);
+            requestRender.run();
+            if (tickContext.checkEndCondition()) {
+                stop();
+                SwingUtilities.invokeLater(() ->
+                    StatisticsWindow.show(tickContext, grid)
+                );
+            }
+        } catch (RuntimeException e) {
+            e.printStackTrace();
             stop();
-            SwingUtilities.invokeLater(() -> 
-                StatisticsWindow.show(tickContext, grid)
-            );
         }
     }
 
@@ -56,5 +61,6 @@ public class Game {
             scheduler.shutdownNow();
             scheduler = null;
         }
+        grid.shutdown();
     }
 }
