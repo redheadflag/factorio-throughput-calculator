@@ -91,27 +91,6 @@ public class TransferService {
         }
 
         res.markMoved(tickContext.tickCount());
-        tickContext.logUpdate();
-        return true;
-    }
-
-    public boolean transferOne(Inventory from, Inventory to, TickContext tickContext) {
-        Optional<Resource> opt = from.peekFirst();
-        if (opt.isEmpty()) return false;
-
-        Resource res = opt.get();
-
-        // Your rule: an item moved this tick cannot move again
-        if (res.movedThisTick(tickContext.tickCount())) return false;
-        if (!from.getPolicy().canExtract(from, res.type)) return false;
-
-        if (!to.canAdd(res)) return false;
-
-        // Now commit
-        from.removeFirst();
-        to.add(res);
-        res.markMoved(tickContext.tickCount());
-        tickContext.logUpdate();
         return true;
     }
 }

@@ -30,8 +30,8 @@ public abstract class AssemblingStationTile extends Tile implements Updatable {
     }
 
     @Override
-    public void tick(TickContext tickContext) {
-        tryPushOutput(tickContext);
+    public boolean tick(TickContext tickContext) {
+        boolean moved = tryPushOutput(tickContext);
 
         if (processingTicksLeft > 0) {
             --processingTicksLeft;
@@ -41,10 +41,10 @@ public abstract class AssemblingStationTile extends Tile implements Updatable {
                 if (!produceOutputToNeighbor(tickContext.tickCount())) {
                     refundInputs();
                 } else {
-                    tickContext.logUpdate();
+                    moved = true;
                 }
             }
-            return;
+            return moved;
         }
 
         if (hasRequiredInputs()) {
@@ -53,22 +53,24 @@ public abstract class AssemblingStationTile extends Tile implements Updatable {
                 processingTicksLeft = processTimeTicks;
             }
         }
+
+        return moved;
     }
 
     public Tile getOutputTile() {
         return getNeighbourTile(OUTPUT);
     }
 
-    private void tryPushOutput(TickContext tickContext) {
+    private boolean tryPushOutput(TickContext tickContext) {
         Optional<Resource> peek = inventory.peekFirst();
-        if (peek.isEmpty()) return;
+        if (peek.isEmpty()) return false;
 
-        if (peek.get().type != outputResourceType) return;
+        if (peek.get().type != outputResourceType) return false;
 
         Tile out = getOutputTile();
-        if (out == null) return;
+        if (out == null) return false;
 
-        transfer.transferOne(this, out, tickContext);
+        return transfer.transferOne(this, out, tickContext);
     }
 
     private boolean produceOutputToNeighbor(long tickCount) {

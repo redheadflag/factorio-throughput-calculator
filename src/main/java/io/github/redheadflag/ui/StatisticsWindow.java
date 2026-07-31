@@ -11,7 +11,6 @@ import io.github.redheadflag.world.GameGrid;
 import io.github.redheadflag.world.Resource;
 import io.github.redheadflag.world.ResourceType;
 import io.github.redheadflag.world.TickContext;
-import io.github.redheadflag.world.Updatable;
 
 public class StatisticsWindow {
 

@@ -18,12 +18,13 @@ public class SplitterTile extends Tile implements Updatable {
     }
 
     @Override
-    public void tick(TickContext tickContext) {
-        if (inventory.isEmpty()) return;
-        
+    public boolean tick(TickContext tickContext) {
+        if (inventory.isEmpty()) return false;
+
         Tile out = getSideTile(nextOutputIndex % 2 == 0);
-        transfer.transferOne(this, out, tickContext);
+        boolean moved = transfer.transferOne(this, out, tickContext);
         this.nextOutputIndex = (nextOutputIndex + 1) % 2;
+        return moved;
     }
 
     public Tile[] getOutputTilesByPriority() {

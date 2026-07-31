@@ -25,10 +25,10 @@ public class ConveyorBeltTile extends Tile implements Updatable {
     }
 
     @Override
-    public void tick(TickContext tickContext) {
+    public boolean tick(TickContext tickContext) {
         Tile target = getNeighbourTile(direction);
-        if (target == null) return;
+        if (target == null) return false;
 
-        transfer.transferOne(this, target, tickContext);
+        return transfer.transferOne(this, target, tickContext);
     }
 }

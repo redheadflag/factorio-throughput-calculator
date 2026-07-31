@@ -23,10 +23,14 @@ public class SourceTile extends Tile implements Updatable {
     }
 
     @Override
-    public void tick(TickContext tickContext) {
+    public boolean tick(TickContext tickContext) {
         List<Tile> neighbours = getNeighbours();
+        boolean moved = false;
         for (Tile neighbour : neighbours) {
-            transfer.transferOne(this, neighbour, tickContext);
+            if (transfer.transferOne(this, neighbour, tickContext)) {
+                moved = true;
+            }
         }
+        return moved;
     }
 }
