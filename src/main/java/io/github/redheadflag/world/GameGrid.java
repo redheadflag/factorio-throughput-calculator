@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -74,7 +76,8 @@ public class GameGrid {
         if (tasks == null) {
             tasks = new ArrayList<>();
             for (List<Tile> component : components) {
-                tasks.add(() -> tickComponent(component, currentTickContext));
+                Random componentRandom = new Random(tickContext.random().nextLong());
+                tasks.add(() -> tickComponent(component, componentRandom, currentTickContext));
             }
         }
         if (pool == null) {
@@ -102,7 +105,9 @@ public class GameGrid {
         }
     }
 
-    private boolean tickComponent(List<Tile> component, TickContext tickContext) {
+    private boolean tickComponent(List<Tile> component, Random componentRandom, TickContext tickContext) {
+        Collections.shuffle(component, componentRandom);
+
         boolean anyUpdate = false;
         for (Tile t : component) {
             if (((Updatable) t).tick(tickContext)) {
