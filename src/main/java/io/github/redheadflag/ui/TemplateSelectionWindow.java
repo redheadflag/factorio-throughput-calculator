@@ -18,6 +18,14 @@ public class TemplateSelectionWindow {
     private static volatile int selectedTicksPerSecond = DEFAULT_TICKS_PER_SECOND;
     private static volatile long selectedSeed = DEFAULT_SEED;
 
+    public static int getSelectedTicksPerSecond() {
+        return selectedTicksPerSecond;
+    }
+
+    public static long getSelectedSeed() {
+        return selectedSeed;
+    }
+
     public static void show() {
         show(TemplateSelectionWindow::launchGame);
     }
@@ -67,7 +75,6 @@ public class TemplateSelectionWindow {
             if (files != null) {
                 for (File file : files) {
                     JButton button = new JButton(file.getName());
-
                     button.addActionListener(e -> {
                         selectedTicksPerSecond = (Integer) ticksPerSecondSpinner.getValue();
                         selectedSeed = ((Number) seedSpinner.getValue()).longValue();

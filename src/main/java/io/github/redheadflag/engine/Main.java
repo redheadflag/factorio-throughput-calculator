@@ -20,6 +20,7 @@ import io.github.redheadflag.distribution.Worker;
 import io.github.redheadflag.tiles.Tile;
 import io.github.redheadflag.ui.GamePanel;
 import io.github.redheadflag.ui.GameWindow;
+import io.github.redheadflag.ui.StatisticsWindow;
 import io.github.redheadflag.ui.TemplateSelectionWindow;
 import io.github.redheadflag.world.GameGrid;
 import io.github.redheadflag.world.Inventory;
@@ -31,7 +32,6 @@ import io.github.redheadflag.world.TransferService;
 public class Main {
 
     private static final int NOTHING = -1;
-    private static final int GUI_TICK_DELAY_MS = 80;
 
     public static void main(String[] args) throws Exception {
         args = MPI.Init(args);
@@ -55,6 +55,14 @@ public class Main {
         if (rank != 0) {
             gridPath = new String(pathBytes, StandardCharsets.UTF_8);
         }
+
+        int[] ticksPerSecondBuf = { rank == 0 ? TemplateSelectionWindow.getSelectedTicksPerSecond() : 0 };
+        MPI.COMM_WORLD.Bcast(ticksPerSecondBuf, 0, 1, MPI.INT, 0);
+        int ticksPerSecond = ticksPerSecondBuf[0];
+
+        long[] seedBuf = { rank == 0 ? TemplateSelectionWindow.getSelectedSeed() : 0L };
+        MPI.COMM_WORLD.Bcast(seedBuf, 0, 1, MPI.LONG, 0);
+        long seed = seedBuf[0];
 
         GameGrid grid = GameGrid.fromFile(gridPath);
         Worker myWorker = Worker.buildAll(grid, size).get(rank);
@@ -130,7 +138,8 @@ public class Main {
         }
 
         TransferService localTransfer = new TransferService();
-        TickContext ctx = new TickContext(1337L);
+        TickContext ctx = new TickContext(seed);
+        long tickPeriodMs = 1000L / Math.max(1, ticksPerSecond);
         long start = System.nanoTime();
         while (!ctx.checkEndCondition()) {
             ctx.incrTickCount();
@@ -193,16 +202,14 @@ public class Main {
                 SwingUtilities.invokeLater(panelToRepaint::repaint);
             }
 
-            Thread.sleep(GUI_TICK_DELAY_MS);
+            Thread.sleep(tickPeriodMs);
         }
 
         long elapsedMs = (System.nanoTime() - start) / 1_000_000;
         System.out.println("rank " + rank + "/" + size + " done at tick " + ctx.tickCount() + " elapsedMs=" + elapsedMs);
-        for (Tile t : myWorker.tiles()) {
-            System.out.println("  " + t + " inventory=" + t.getInventory().itemCount());
-        }
-        for (Edge e : incomingEdges) {
-            System.out.println("  " + e.target() + " inventory=" + e.target().getInventory().itemCount());
+
+        if (rank == 0) {
+            SwingUtilities.invokeLater(() -> StatisticsWindow.show(ctx, grid));
         }
 
         MPI.Finalize();
