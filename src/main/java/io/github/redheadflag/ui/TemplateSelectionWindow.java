@@ -10,6 +10,8 @@ import java.io.File;
 public class TemplateSelectionWindow {
 
     private static final String GRID_TEMPLATES_FOLDER = "grid_templates/";
+    private static final int DEFAULT_TICKS_PER_SECOND = 10;
+    private static final long DEFAULT_SEED = 1337L;
 
     public static void show() {
         SwingUtilities.invokeLater(() -> {
@@ -17,6 +19,17 @@ public class TemplateSelectionWindow {
             JFrame frame = new JFrame("Select Grid Template");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setLayout(new BorderLayout());
+
+            JPanel settingsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            JSpinner ticksPerSecondSpinner = new JSpinner(
+                    new SpinnerNumberModel(DEFAULT_TICKS_PER_SECOND, 1, 1000, 1));
+            JSpinner seedSpinner = new JSpinner(
+                    new SpinnerNumberModel(DEFAULT_SEED, Long.MIN_VALUE, Long.MAX_VALUE, 1L));
+            settingsPanel.add(new JLabel("Ticks per second:"));
+            settingsPanel.add(ticksPerSecondSpinner);
+            settingsPanel.add(new JLabel("Seed:"));
+            settingsPanel.add(seedSpinner);
+            frame.add(settingsPanel, BorderLayout.NORTH);
 
             JPanel buttonPanel = new JPanel();
             buttonPanel.setLayout(new GridLayout(0, 1, 5, 5));
@@ -34,7 +47,9 @@ public class TemplateSelectionWindow {
                     JButton button = new JButton(file.getName());
 
                     button.addActionListener(e -> {
-                        launchGame(file.getName());
+                        int ticksPerSecond = (Integer) ticksPerSecondSpinner.getValue();
+                        long seed = ((Number) seedSpinner.getValue()).longValue();
+                        launchGame(file.getName(), ticksPerSecond, seed);
                         frame.dispose();
                     });
 
@@ -50,16 +65,17 @@ public class TemplateSelectionWindow {
         });
     }
 
-    private static void launchGame(String filename) {
+    private static void launchGame(String filename, int ticksPerSecond, long seed) {
         GameGrid grid = GameGrid.fromFile(GRID_TEMPLATES_FOLDER + filename);
         GamePanel panel = new GamePanel(grid);
 
         Game game = new Game(
                 grid,
                 panel::repaint,
-                () -> GameWindow.show(panel)
+                () -> GameWindow.show(panel),
+                seed
         );
 
-        game.start(1);
+        game.start(ticksPerSecond);
     }
 }

@@ -20,12 +20,13 @@ public class Game {
     public Game(
         GameGrid grid,
         Runnable requestRender,
-        Runnable onStart
+        Runnable onStart,
+        long seed
     ) {
         this.grid = grid;
         this.requestRender = requestRender;
         this.onStart = onStart;
-        this.tickContext = new TickContext();
+        this.tickContext = new TickContext(seed);
     }
 
     public void tick() {
