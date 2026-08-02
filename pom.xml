@@ -13,10 +13,12 @@
         <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
-    <dependency>
-        <groupId>mpj</groupId>
-        <artifactId>mpj</artifactId>
-        <version>0.44</version>
-    </dependency>
+    <dependencies>
+        <dependency>
+            <groupId>mpj</groupId>
+            <artifactId>mpj</artifactId>
+            <version>0.44</version>
+        </dependency>
+    </dependencies>
 
 </project>
