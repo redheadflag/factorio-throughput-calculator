@@ -6,6 +6,8 @@ import io.github.redheadflag.world.GameGrid;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
 
 public class TemplateSelectionWindow {
 
@@ -13,7 +15,27 @@ public class TemplateSelectionWindow {
     private static final int DEFAULT_TICKS_PER_SECOND = 10;
     private static final long DEFAULT_SEED = 1337L;
 
+    private static volatile int selectedTicksPerSecond = DEFAULT_TICKS_PER_SECOND;
+    private static volatile long selectedSeed = DEFAULT_SEED;
+
     public static void show() {
+        show(TemplateSelectionWindow::launchGame);
+    }
+
+    public static String showAndWait() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        String[] result = new String[1];
+
+        show(filename -> {
+            result[0] = GRID_TEMPLATES_FOLDER + filename;
+            latch.countDown();
+        });
+
+        latch.await();
+        return result[0];
+    }
+
+    public static void show(Consumer<String> onSelect) {
         SwingUtilities.invokeLater(() -> {
 
             JFrame frame = new JFrame("Select Grid Template");
@@ -47,9 +69,9 @@ public class TemplateSelectionWindow {
                     JButton button = new JButton(file.getName());
 
                     button.addActionListener(e -> {
-                        int ticksPerSecond = (Integer) ticksPerSecondSpinner.getValue();
-                        long seed = ((Number) seedSpinner.getValue()).longValue();
-                        launchGame(file.getName(), ticksPerSecond, seed);
+                        selectedTicksPerSecond = (Integer) ticksPerSecondSpinner.getValue();
+                        selectedSeed = ((Number) seedSpinner.getValue()).longValue();
+                        onSelect.accept(file.getName());
                         frame.dispose();
                     });
 
@@ -65,7 +87,7 @@ public class TemplateSelectionWindow {
         });
     }
 
-    private static void launchGame(String filename, int ticksPerSecond, long seed) {
+    private static void launchGame(String filename) {
         GameGrid grid = GameGrid.fromFile(GRID_TEMPLATES_FOLDER + filename);
         GamePanel panel = new GamePanel(grid);
 
@@ -73,9 +95,9 @@ public class TemplateSelectionWindow {
                 grid,
                 panel::repaint,
                 () -> GameWindow.show(panel),
-                seed
+                selectedSeed
         );
 
-        game.start(ticksPerSecond);
+        game.start(selectedTicksPerSecond);
     }
 }

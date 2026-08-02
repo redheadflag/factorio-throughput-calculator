@@ -1,0 +1,9 @@
+8 4
+SC5 BR BR BD
+. . . BD
+BD BL BL BL
+BD . . .
+BR BR BR BD
+. . . BD
+BD BL BL BL
+C . . .
